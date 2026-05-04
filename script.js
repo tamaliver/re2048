@@ -26,10 +26,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sound Manager using Web Audio API
     const SoundManager = {
         ctx: null,
+        isUnlocked: false,
         
         init() {
             if (this.ctx) return;
             this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        },
+
+        // Dedicated method to unlock audio on mobile
+        unlock() {
+            if (this.isUnlocked) return;
+            this.init();
+            
+            // Create and play a silent buffer to unlock
+            const buffer = this.ctx.createBuffer(1, 1, 22050);
+            const source = this.ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(this.ctx.destination);
+            source.start(0);
+            
+            if (this.ctx.state === 'suspended') {
+                this.ctx.resume().then(() => {
+                    this.isUnlocked = true;
+                    console.log('Audio unlocked');
+                });
+            } else {
+                this.isUnlocked = true;
+            }
         },
 
         playMove() {
@@ -417,4 +440,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Start game
     initGame();
+
+    // Unlock audio on first interaction (Crucial for mobile)
+    ['touchstart', 'mousedown', 'keydown'].forEach(event => {
+        document.addEventListener(event, () => {
+            SoundManager.unlock();
+        }, { once: true });
+    });
 });
