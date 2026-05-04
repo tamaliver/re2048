@@ -1,0 +1,222 @@
+:root {
+  --bg-color: #faf8ef;
+  --text-color: #776e65;
+  --grid-bg: #bbada0;
+  --cell-bg: rgba(238, 228, 218, 0.35);
+  
+  /* These will be overridden by JS, but we need defaults */
+  --base-hue: 200;
+  --tile-radius: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  touch-action: none; /* Prevent scroll on mobile during swipe */
+  overflow: hidden; /* Prevent bouncing */
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 15px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: bold;
+  margin: 0;
+  color: #776e65;
+}
+
+.scores {
+  display: flex;
+  gap: 10px;
+}
+
+.score-box {
+  background: var(--grid-bg);
+  padding: 8px 15px;
+  border-radius: 6px;
+  color: white;
+  text-align: center;
+  min-width: 70px;
+}
+
+.score-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #eee4da;
+}
+
+.score-value {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.game-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+#stage-info {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+#current-n {
+  color: #f67c5f;
+  font-size: 24px;
+}
+
+button {
+  background: #8f7a66;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #9f8b77;
+}
+
+.game-container {
+  position: relative;
+  background: var(--grid-bg);
+  border-radius: 10px;
+  padding: 10px;
+  width: 100%;
+  aspect-ratio: 1; /* Make it a square */
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+.grid-cell {
+  background: var(--cell-bg);
+  border-radius: var(--tile-radius);
+}
+
+.tile-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  pointer-events: none;
+}
+
+.tile {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(25% - 7.5px); /* (100% - 3*gap) / 4 */
+  height: calc(25% - 7.5px);
+  background: #eee4da;
+  border-radius: var(--tile-radius);
+  font-weight: bold;
+  font-size: 35px;
+  color: #776e65;
+  /* Smooth movement transition */
+  transition: top 0.15s cubic-bezier(0.165, 0.84, 0.44, 1), 
+              left 0.15s cubic-bezier(0.165, 0.84, 0.44, 1),
+              background-color 0.1s ease,
+              transform 0.1s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+/* Base tile animation */
+@keyframes appear {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.tile-new {
+  animation: appear 0.2s ease-in-out;
+}
+
+.tile-merged {
+  animation: pop 0.2s ease-in-out;
+  z-index: 20;
+}
+
+.game-message {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(238, 228, 218, 0.73);
+  z-index: 100;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  animation: fade-in 0.8s ease;
+}
+
+.game-message p {
+  font-size: 40px;
+  font-weight: bold;
+  color: #776e65;
+  margin-bottom: 20px;
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@media screen and (max-width: 500px) {
+  .title {
+    font-size: 28px;
+  }
+  .game-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  .tile {
+    font-size: 28px;
+  }
+}
