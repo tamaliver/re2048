@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let score = 0;
     let bestScore = localStorage.getItem('multi2048-best-score') || 0;
     let n = 3;
-    let baseHue = 200; // Will be determined based on n
+    let baseHue = 200; 
+    let gameStarted = false;
     
     // DOM Elements
     const gridContainer = document.querySelector('.grid-container');
@@ -23,26 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let tileElements = new Map();
     let nextTileId = 0;
 
-    // Debug logger
-    const debug = (msg) => {
-        console.log(msg);
-        // Optional: show on screen for mobile debugging
-        let debugEl = document.getElementById('debug-log');
-        if (!debugEl) {
-            debugEl = document.createElement('div');
-            debugEl.id = 'debug-log';
-            debugEl.style.position = 'fixed';
-            debugEl.style.bottom = '5px';
-            debugEl.style.left = '5px';
-            debugEl.style.fontSize = '10px';
-            debugEl.style.color = '#776e65';
-            debugEl.style.opacity = '0.5';
-            debugEl.style.pointerEvents = 'none';
-            document.body.appendChild(debugEl);
-        }
-        debugEl.textContent = msg;
-    };
-
     // Sound Manager using Web Audio API
     const SoundManager = {
         ctx: null,
@@ -52,52 +33,48 @@ document.addEventListener('DOMContentLoaded', () => {
             if (this.ctx) return;
             try {
                 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContextClass) {
-                    debug('AudioContext not supported');
-                    return;
-                }
+                if (!AudioContextClass) return;
                 this.ctx = new AudioContextClass();
-                debug(`AudioContext created: ${this.ctx.state}`);
-            } catch (e) {
-                debug(`Audio Init Error: ${e.message}`);
-            }
+            } catch (e) {}
         },
 
-        // Dedicated method to unlock audio on mobile
         unlock() {
             this.init();
             if (!this.ctx) return;
-            
-            debug(`Unlocking... state: ${this.ctx.state}`);
-            
-            // On iOS, resume() must be called in the same stack as the user event
-            const resumePromise = this.ctx.resume();
-            if (resumePromise) {
-                resumePromise.then(() => {
-                    this.isUnlocked = true;
-                    debug(`Audio unlocked! State: ${this.ctx.state}`);
-                    this.playTest();
-                }).catch(err => {
-                    debug(`Resume Error: ${err.message}`);
-                });
-            } else {
-                // Older browsers might not return a promise
+            if (this.ctx.state === 'running') {
                 this.isUnlocked = true;
-                debug('Audio unlocked (no promise)');
+                return;
             }
+            this.ctx.resume().then(() => {
+                if (this.ctx.state === 'running') {
+                    this.isUnlocked = true;
+                }
+            });
         },
 
-        playTest() {
+        playStart() {
+            this.init();
             if (!this.ctx) return;
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.frequency.setValueAtTime(880, this.ctx.currentTime); 
-            gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start();
-            osc.stop(this.ctx.currentTime + 0.1);
+            const now = this.ctx.currentTime;
+            
+            const playNote = (freq, start, duration) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(freq, start);
+                gain.gain.setValueAtTime(0.1, start);
+                gain.gain.exponentialRampToValueAtTime(0.01, start + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(start);
+                osc.stop(start + duration);
+            };
+
+            // Simple 8-bit arpeggio
+            playNote(523.25, now, 0.1); // C5
+            playNote(659.25, now + 0.1, 0.1); // E5
+            playNote(783.99, now + 0.2, 0.1); // G5
+            playNote(1046.50, now + 0.3, 0.2); // C6
         },
 
         playMove() {
@@ -107,17 +84,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
-            
             osc.type = 'square';
             osc.frequency.setValueAtTime(300, this.ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.15);
-            
-            gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
             gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.15);
-            
             osc.connect(gain);
             gain.connect(this.ctx.destination);
-            
             osc.start();
             osc.stop(this.ctx.currentTime + 0.15);
         },
@@ -129,21 +102,47 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
-            
             osc.type = 'sine';
             osc.frequency.setValueAtTime(500, this.ctx.currentTime);
             osc.frequency.exponentialRampToValueAtTime(1000, this.ctx.currentTime + 0.15);
-            
-            gain.gain.setValueAtTime(1.0, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.5, this.ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
-            
             osc.connect(gain);
             gain.connect(this.ctx.destination);
-            
             osc.start();
             osc.stop(this.ctx.currentTime + 0.3);
+        },
+
+        playWin() {
+            this.init();
+            if (!this.ctx) return;
+            const now = this.ctx.currentTime;
+            
+            const notes = [
+                { f: 523.25, d: 0.1 }, // C5
+                { f: 659.25, d: 0.1 }, // E5
+                { f: 783.99, d: 0.1 }, // G5
+                { f: 1046.50, d: 0.3 } // C6
+            ];
+
+            let time = now;
+            notes.forEach(note => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(note.f, time);
+                gain.gain.setValueAtTime(0.1, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + note.d);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(time);
+                osc.stop(time + note.d);
+                time += note.d;
+            });
         }
     };
+
+    let hasWon = false;
 
     function initGame() {
         // Random n between 3 and 9
@@ -161,8 +160,31 @@ document.addEventListener('DOMContentLoaded', () => {
         tileContainer.innerHTML = '';
         tileElements.clear();
         nextTileId = 0;
+        gameStarted = false;
+        hasWon = false;
+        restartBtn.textContent = 'Start Game';
         
-        // Spawn 2 initial tiles
+        // Don't add initial tiles yet, just show empty board or hidden tiles
+        renderBoard();
+    }
+
+    function startGame() {
+        if (gameMessage.style.display === 'flex' && hasWon) {
+            gameMessage.style.display = 'none';
+            return;
+        }
+
+        if (gameStarted) {
+            initGame();
+            return;
+        }
+        
+        SoundManager.unlock();
+        SoundManager.playStart();
+        
+        gameStarted = true;
+        restartBtn.textContent = 'New Game';
+        
         addRandomTile();
         addRandomTile();
         renderBoard();
@@ -189,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function getTileColor(value) {
-        if (!value) return { bg: 'transparent', textColor: 'transparent', boxShadow: 'none' };
+        if (!value || !gameStarted) return { bg: '#cdc1b4', textColor: 'transparent', boxShadow: 'none' };
         
         let level = Math.log2(value / n);
         if (level < 0) level = 0;
@@ -212,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderBoard() {
-        // IDs that should be on the board at the end of this render
         let currentIds = new Set();
         for (let r = 0; r < 4; r++) {
             for (let c = 0; c < 4; c++) {
@@ -220,7 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Remove tiles that are not even in the "to be removed" list and not on board
         for (let [id, element] of tileElements.entries()) {
             if (!currentIds.has(id) && !element.dataset.toRemove) {
                 element.remove();
@@ -228,7 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Update or create tiles
         for (let r = 0; r < 4; r++) {
             for (let c = 0; c < 4; c++) {
                 let tileData = board[r][c];
@@ -247,12 +266,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     
-                    // Position
                     tile.style.left = `calc(${c * 25}% + ${c === 0 ? '0px' : c === 1 ? '2.5px' : c === 2 ? '5px' : '7.5px'})`;
                     tile.style.top = `calc(${r * 25}% + ${r === 0 ? '0px' : r === 1 ? '2.5px' : r === 2 ? '5px' : '7.5px'})`;
                     
-                    // Value and Style
-                    tile.textContent = tileData.value;
+                    tile.textContent = gameStarted ? tileData.value : "";
                     let colors = getTileColor(tileData.value);
                     tile.style.backgroundColor = colors.bg;
                     tile.style.color = colors.textColor;
@@ -265,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     
                     if (tileData.isMerged) {
-                        // Delay the pop animation slightly to let the slide finish
                         setTimeout(() => {
                             tile.classList.add('tile-merged');
                             setTimeout(() => tile.classList.remove('tile-merged'), 200);
@@ -288,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function move(direction) {
-        if (gameMessage.style.display === 'flex') return;
+        if (!gameStarted || gameMessage.style.display === 'flex') return;
 
         let moved = false;
         let scoreGained = 0;
@@ -312,16 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     let newValue = tiles[j].data.value * 2;
                     scoreGained += newValue;
                     
-                    // The tile at tiles[j+1] is merging into tiles[j]
-                    // We want to move tiles[j+1] to the final position of this merged tile
                     let destinationIdx = newLine.length;
-                    
-                    // Move the "ghost" tile
                     let ghostId = tiles[j+1].data.id;
                     let ghostElement = tileElements.get(ghostId);
                     if (ghostElement) {
                         ghostElement.dataset.toRemove = "true";
-                        // Calculate final position in the line
                         let destR, destC;
                         if (direction === 0) { destR = destinationIdx; destC = i; }
                         else if (direction === 1) { destR = i; destC = 3-destinationIdx; }
@@ -384,22 +395,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 SoundManager.playMove();
             }
 
-            // Delay adding random tile slightly for better feel
             setTimeout(() => {
                 addRandomTile();
                 renderBoard();
+                
+                // Check Win
+                if (!hasWon) {
+                    for (let r = 0; r < 4; r++) {
+                        for (let c = 0; c < 4; c++) {
+                            if (board[r][c] && board[r][c].value >= n * 1024) {
+                                hasWon = true;
+                                showWinMessage();
+                                return;
+                            }
+                        }
+                    }
+                }
+                
                 checkGameOver();
             }, 100);
             renderBoard();
         }
     }
     
+    function showWinMessage() {
+        SoundManager.playWin();
+        gameMessage.querySelector('p').textContent = 'YOU WIN!';
+        retryBtn.textContent = 'Keep Playing';
+        gameMessage.style.display = 'flex';
+    }
+
     function checkGameOver() {
-        // Empty cells?
+        gameMessage.querySelector('p').textContent = 'Game Over!';
+        retryBtn.textContent = 'Try Again';
         for (let r = 0; r < 4; r++) {
             for (let c = 0; c < 4; c++) if (board[r][c] === null) return false;
         }
-        // Adjacent equals?
         for (let r = 0; r < 4; r++) {
             for (let c = 0; c < 4; c++) {
                 if (c < 3 && board[r][c].value === board[r][c+1].value) return false;
@@ -412,25 +443,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Keyboard controls
     document.addEventListener('keydown', (e) => {
-        if (gameMessage.style.display === 'flex') return;
+        if (!gameStarted || gameMessage.style.display === 'flex') return;
         
         switch(e.key) {
-            case 'ArrowUp':
-                e.preventDefault();
-                move(0);
-                break;
-            case 'ArrowRight':
-                e.preventDefault();
-                move(1);
-                break;
-            case 'ArrowDown':
-                e.preventDefault();
-                move(2);
-                break;
-            case 'ArrowLeft':
-                e.preventDefault();
-                move(3);
-                break;
+            case 'ArrowUp': e.preventDefault(); move(0); break;
+            case 'ArrowRight': e.preventDefault(); move(1); break;
+            case 'ArrowDown': e.preventDefault(); move(2); break;
+            case 'ArrowLeft': e.preventDefault(); move(3); break;
         }
     });
     
@@ -445,11 +464,10 @@ document.addEventListener('DOMContentLoaded', () => {
     gameContainer.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
         touchStartY = e.changedTouches[0].screenY;
-        // Don't preventDefault here, let the browser handle clicks/taps normally if it's not a swipe
     }, {passive: false});
     
     gameContainer.addEventListener('touchmove', e => {
-        e.preventDefault(); // Prevent scrolling during swipe
+        if (gameStarted) e.preventDefault();
     }, {passive: false});
     
     gameContainer.addEventListener('touchend', e => {
@@ -459,39 +477,56 @@ document.addEventListener('DOMContentLoaded', () => {
     }, {passive: false});
     
     function handleSwipe() {
-        if (gameMessage.style.display === 'flex') return;
-        
+        if (!gameStarted || gameMessage.style.display === 'flex') return;
         let dx = touchEndX - touchStartX;
         let dy = touchEndY - touchStartY;
-        
         let absDx = Math.abs(dx);
         let absDy = Math.abs(dy);
-        
-        // Minimum swipe distance
         if (Math.max(absDx, absDy) > 30) {
             if (absDx > absDy) {
-                // Horizontal
-                if (dx > 0) move(1); // Right
-                else move(3); // Left
+                if (dx > 0) move(1); else move(3);
             } else {
-                // Vertical
-                if (dy > 0) move(2); // Down
-                else move(0); // Up
+                if (dy > 0) move(2); else move(0);
             }
         }
     }
     
     // Buttons
-    restartBtn.addEventListener('click', initGame);
-    retryBtn.addEventListener('click', initGame);
+    restartBtn.addEventListener('click', startGame);
+    retryBtn.addEventListener('click', startGame);
     
-    // Start game
+    // Help Modal
+    const helpModal = document.getElementById('help-modal');
+    const helpOpenBtn = document.getElementById('help-open-btn');
+    const helpCloseBtn = document.getElementById('help-close-btn');
+
+    helpOpenBtn.addEventListener('click', () => {
+        helpModal.style.display = 'block';
+    });
+
+    helpCloseBtn.addEventListener('click', () => {
+        helpModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+        if (event.target === helpModal) {
+            helpModal.style.display = 'none';
+        }
+    });
+
+    // Start initial state
     initGame();
 
-    // Unlock audio on first interaction (Crucial for mobile)
+    // Secondary unlock on any interaction
+    const unlockHandler = () => {
+        SoundManager.unlock();
+        if (SoundManager.ctx && SoundManager.ctx.state === 'running') {
+            ['touchstart', 'mousedown', 'keydown', 'click'].forEach(event => {
+                document.removeEventListener(event, unlockHandler);
+            });
+        }
+    };
     ['touchstart', 'mousedown', 'keydown', 'click'].forEach(event => {
-        document.addEventListener(event, () => {
-            SoundManager.unlock();
-        }, { once: true });
+        document.addEventListener(event, unlockHandler);
     });
 });
