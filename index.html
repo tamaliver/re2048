@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>2048PLUS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=2">
+</head>
+
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Re:2048</h1>
+      <div class="scores">
+        <div class="score-box">
+          <div class="score-label">SCORE</div>
+          <div class="score-value" id="score">0</div>
+        </div>
+        <div class="score-box">
+          <div class="score-label">BEST</div>
+          <div class="score-value" id="best-score">0</div>
+        </div>
+        <button class="help-btn" id="help-open-btn">?</button>
+      </div>
+    </header>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn" id="help-close-btn">&times;</span>
+        <h2>How to Play / 遊び方</h2>
+        <div class="help-section">
+          <h3>Japanese</h3>
+          <p>[Start Game]を押してゲームを始めよう！同じ数字のタイルをスワイプで重ねると合体して2倍になります。ステージの倍数は３〜９をランダムに設定します。</p>
+          <h3>English</h3>
+          <p>Press [Start Game] to begin! Swipe identical tiles to merge them and double their value. The multiplier is randomly set between 3 and 9 for each game.</p>
+        </div>
+        <hr>
+        <h2>App Mode / ホーム画面に追加</h2>
+        <div class="help-section">
+          <p>iPhoneのSafariでアプリのように遊ぶには：</p>
+          <ol>
+            <li>画面下の共有アイコン（四角と矢印）をタップ</li>
+            <li>「ホーム画面に追加」を選択</li>
+          </ol>
+          <p>To play like an app on iPhone Safari:</p>
+          <ol>
+            <li>Tap the Share icon at the bottom</li>
+            <li>Select "Add to Home Screen"</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-info">
+      <button class="restart-btn" id="restart-btn">New Game</button>
+      <p id="stage-info">Multiples of <span id="current-n">?</span> Mode</p>
+    </div>
+
+    <div class="game-container">
+      <div class="grid-container">
+        <!-- Background grid cells -->
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+        <div class="grid-cell"></div>
+      </div>
+      <div class="tile-container" id="tile-container">
+        <!-- Tiles will be added here via JS -->
+      </div>
+
+      <div class="game-message" id="game-message">
+        <p>Game Over!</p>
+        <div class="actions">
+          <button class="retry-button" id="retry-btn">Try Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js?v=2"></script>
+</body>
+
+</html>
