@@ -4,9 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Re:2048 is a fast browser puzzle game inspired by 2048, with random multiplier modes from 2 to 9.">
   <title>2048PLUS</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 
 <body>
@@ -33,9 +34,11 @@
         <h2>How to Play / 遊び方</h2>
         <div class="help-section">
           <h3>Japanese</h3>
-          <p>[Start Game]を押してゲームを始めよう！同じ数字のタイルをスワイプで重ねると合体して2倍になります。ステージの倍数は３〜９をランダムに設定します。</p>
+          <p>[Start Game]を押してゲームを始めよう！同じ数字のタイルをスワイプで重ねると合体して2倍になります。ステージの倍数は2〜9をランダムに設定します。</p>
+          <p>ロボットボタンを押すとAuto modeになります。ゲームが自動で進むので、合成されていく盤面をぼーっと眺めて楽しめます。Auto mode中のスコアはBESTには反映されません。</p>
           <h3>English</h3>
-          <p>Press [Start Game] to begin! Swipe identical tiles to merge them and double their value. The multiplier is randomly set between 3 and 9 for each game.</p>
+          <p>Press [Start Game] to begin! Swipe identical tiles to merge them and double their value. The multiplier is randomly set between 2 and 9 for each game.</p>
+          <p>Press the robot button to start Auto mode. The game will play itself, so you can relax and watch the board evolve. Scores earned in Auto mode do not update BEST.</p>
         </div>
         <hr>
         <h2>App Mode / ホーム画面に追加</h2>
@@ -55,8 +58,16 @@
     </div>
 
     <div class="game-info">
+      <div class="game-actions">
+        <button class="restart-btn" id="restart-btn">New Game</button>
+        <button class="auto-btn" id="auto-btn" aria-label="Auto mode" title="Auto mode" aria-pressed="false">
+          <svg class="auto-icon" viewBox="0 0 640 512" aria-hidden="true" focusable="false">
+            <path fill="currentColor" d="M320 0c17.7 0 32 14.3 32 32V64H480c35.3 0 64 28.7 64 64V448c0 35.3-28.7 64-64 64H160c-35.3 0-64-28.7-64-64V128c0-35.3 28.7-64 64-64H288V32c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16H432c8.8 0 16-7.2 16-16s-7.2-16-16-16H208zm-32-160a48 48 0 1 0 96 0 48 48 0 1 0-96 0zm240-48a48 48 0 1 0 0 96 48 48 0 1 0 0-96zM48 224H64V416H48c-26.5 0-48-21.5-48-48V272c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48H576V224h16z" />
+          </svg>
+          <span class="auto-stop-text">STOP</span>
+        </button>
+      </div>
       <p id="stage-info">Multiples of <span id="current-n">?</span> Mode</p>
-      <button class="restart-btn" id="restart-btn">New Game</button>
     </div>
 
     <div class="game-container">
@@ -90,9 +101,21 @@
         </div>
       </div>
     </div>
+
+    <section class="support-panel kofi-panel" aria-label="Support Re:2048 on Ko-fi">
+      <script type="text/javascript" src="https://storage.ko-fi.com/cdn/widget/Widget_2.js"></script>
+      <script type="text/javascript">
+        kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'B2P320X27U');
+        kofiwidget2.draw();
+      </script>
+    </section>
+
+    <footer class="site-footer">
+      <a href="privacy.html">Privacy Policy</a>
+    </footer>
   </div>
 
-  <script src="script.js?v=2"></script>
+  <script src="script.js?v=8"></script>
 </body>
 
 </html>
