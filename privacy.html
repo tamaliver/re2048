@@ -7,29 +7,77 @@
   <meta name="description" content="Privacy policy for Re:2048.">
   <title>Privacy Policy - Re:2048</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 
 <body class="document-page">
   <main class="policy-container">
     <a class="back-link" href="index.html">Back to Game</a>
     <h1>Privacy Policy</h1>
-    <p>Re:2048 stores your best score in your browser using localStorage. This data stays on your device and is not sent to our server.</p>
 
-    <h2>Advertising</h2>
-    <p>Re:2048 does not currently load third-party advertising scripts. If advertising is enabled in the future, third-party ad services may use cookies or similar technologies to serve and measure ads.</p>
+    <div class="language-switch" role="tablist" aria-label="Privacy policy language">
+      <button class="language-button language-button-active" type="button" data-policy-lang="ja" role="tab" aria-selected="true" aria-controls="policy-ja">日本語</button>
+      <button class="language-button" type="button" data-policy-lang="en" role="tab" aria-selected="false" aria-controls="policy-en">English</button>
+    </div>
 
-    <h2>Support Links</h2>
-    <p>Re:2048 may link to or load a third-party support widget from Ko-fi. Payments are handled by Ko-fi under its own terms and privacy policy.</p>
+    <section class="policy-language" id="policy-ja" data-policy-panel="ja" role="tabpanel">
+      <p>Re:2048 は、ベストスコアをお使いのブラウザの localStorage に保存します。このデータは端末内に保存され、当サイトのサーバーには送信されません。</p>
 
-    <h2>アクセス解析</h2>
-    <p>現時点では、Re:2048 は独自のアクセス解析を実装していません。今後アクセス解析を追加する場合、このページを更新します。</p>
+      <h2>広告について</h2>
+      <p>現在、Re:2048 は第三者広告スクリプトを読み込んでいません。将来広告を有効にする場合、広告サービスがCookieまたは類似技術を使用して、広告の配信や測定を行うことがあります。</p>
 
-    <h2>Contact</h2>
-    <p>For privacy questions, contact the site owner through the contact method listed on the hosting or repository profile for this project.</p>
+      <h2>支援リンクについて</h2>
+      <p>Re:2048 は、Ko-fi の第三者支援ウィジェットを読み込む場合があります。支払いは Ko-fi によって処理され、Ko-fi の利用規約およびプライバシーポリシーが適用されます。</p>
 
-    <p class="policy-updated">Last updated: 2026-06-04</p>
+      <h2>アクセス解析</h2>
+      <p>現時点では、Re:2048 は独自のアクセス解析を実装していません。今後アクセス解析を追加する場合、このページを更新します。</p>
+
+      <h2>お問い合わせ</h2>
+      <p>プライバシーに関するお問い合わせは、このプロジェクトのホスティング先またはリポジトリプロフィールに記載された連絡方法から、サイト管理者へご連絡ください。</p>
+
+      <p class="policy-updated">最終更新日: 2026-06-04</p>
+    </section>
+
+    <section class="policy-language" id="policy-en" data-policy-panel="en" role="tabpanel" hidden>
+      <p>Re:2048 stores your best score in your browser using localStorage. This data stays on your device and is not sent to our server.</p>
+
+      <h2>Advertising</h2>
+      <p>Re:2048 does not currently load third-party advertising scripts. If advertising is enabled in the future, third-party ad services may use cookies or similar technologies to serve and measure ads.</p>
+
+      <h2>Support Links</h2>
+      <p>Re:2048 may link to or load a third-party support widget from Ko-fi. Payments are handled by Ko-fi under its own terms and privacy policy.</p>
+
+      <h2>Analytics</h2>
+      <p>Re:2048 does not currently implement its own analytics. If analytics are added in the future, this page will be updated.</p>
+
+      <h2>Contact</h2>
+      <p>For privacy questions, contact the site owner through the contact method listed on the hosting or repository profile for this project.</p>
+
+      <p class="policy-updated">Last updated: 2026-06-04</p>
+    </section>
   </main>
+
+  <script>
+    const languageButtons = document.querySelectorAll('[data-policy-lang]');
+    const languagePanels = document.querySelectorAll('[data-policy-panel]');
+
+    languageButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const activeLanguage = button.dataset.policyLang;
+        document.documentElement.lang = activeLanguage;
+
+        languageButtons.forEach(item => {
+          const isActive = item.dataset.policyLang === activeLanguage;
+          item.classList.toggle('language-button-active', isActive);
+          item.setAttribute('aria-selected', String(isActive));
+        });
+
+        languagePanels.forEach(panel => {
+          panel.hidden = panel.dataset.policyPanel !== activeLanguage;
+        });
+      });
+    });
+  </script>
 </body>
 
 </html>

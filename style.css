@@ -432,6 +432,34 @@ button:hover {
   font-size: 32px;
 }
 
+.language-switch {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 0 14px;
+  padding: 4px;
+  background: rgba(187, 173, 160, 0.22);
+  border-radius: 6px;
+}
+
+.language-button {
+  min-width: 86px;
+  padding: 8px 12px;
+  background: transparent;
+  color: #776e65;
+  font-size: 13px;
+  border-radius: 4px;
+}
+
+.language-button:hover,
+.language-button-active {
+  background: #8f7a66;
+  color: #fff;
+}
+
+.policy-language[hidden] {
+  display: none;
+}
+
 .policy-container h2 {
   margin: 26px 0 8px;
   color: #776e65;
