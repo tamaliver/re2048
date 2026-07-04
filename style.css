@@ -195,6 +195,25 @@ button:hover {
   justify-content: flex-start;
 }
 
+.kofi-button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  background: #72a4f2;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.kofi-button:hover {
+  opacity: 0.86;
+}
+
 .grid-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
