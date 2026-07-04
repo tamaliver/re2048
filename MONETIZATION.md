@@ -14,6 +14,23 @@ Netlify settings:
 
 Ko-fi is currently embedded with the official widget snippet in `index.html`.
 
+## Supporter Auto mode
+
+Auto mode is currently locked behind a supporter unlock code. Share this code with Ko-fi supporters through a Ko-fi supporter-only post, thank-you message, or manual reply:
+
+```text
+RE2048-AUTO-KOFI
+```
+
+The static-site implementation stores an unlocked flag in the player's browser. This is good enough for a lightweight supporter perk, but it is not strong access control because client-side code can be inspected.
+
+For stronger verification later, replace the unlock code flow with:
+
+- Ko-fi webhook
+- Netlify Function
+- server-side supporter/payment check
+- short-lived unlock token returned to the browser
+
 ## Platform notes
 
 - Ko-fi: Good for casual tips, memberships, and a lightweight creator page.

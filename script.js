@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const restartBtn = document.getElementById('restart-btn');
     const autoBtn = document.getElementById('auto-btn');
     const retryBtn = document.getElementById('retry-btn');
+    const autoUnlockModal = document.getElementById('auto-unlock-modal');
+    const autoUnlockCloseBtn = document.getElementById('auto-unlock-close-btn');
+    const autoUnlockInput = document.getElementById('auto-unlock-input');
+    const autoUnlockSubmit = document.getElementById('auto-unlock-submit');
+    const autoUnlockMessage = document.getElementById('auto-unlock-message');
 
     // Initialize
     bestScoreElement.textContent = bestScore;
@@ -30,6 +35,61 @@ document.addEventListener('DOMContentLoaded', () => {
     let discoveredValues = new Set();
     let bestScoreEligible = true;
     const AUTO_MOVE_DELAY = 180;
+    const AUTO_UNLOCK_STORAGE_KEY = 're2048-auto-mode-unlocked';
+    const AUTO_UNLOCK_HASH = '2dbdeba73b39ab3ae5dddfe3f758167dceb9d7f8660ec2ceb13eab1cf335c955';
+
+    function isAutoModeUnlocked() {
+        return localStorage.getItem(AUTO_UNLOCK_STORAGE_KEY) === 'true';
+    }
+
+    function updateAutoButtonLockState() {
+        if (!autoBtn) return;
+        const unlocked = isAutoModeUnlocked();
+        autoBtn.classList.toggle('auto-btn-locked', !unlocked);
+        autoBtn.setAttribute('aria-label', unlocked ? 'Auto mode' : 'Unlock Auto mode');
+        autoBtn.title = unlocked ? 'Auto mode' : 'Unlock Auto mode';
+    }
+    updateAutoButtonLockState();
+
+    async function hashUnlockCode(code) {
+        const normalizedCode = code.trim().toUpperCase();
+        const data = new TextEncoder().encode(normalizedCode);
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    function openAutoUnlockModal() {
+        autoUnlockMessage.textContent = '';
+        autoUnlockInput.value = '';
+        autoUnlockModal.style.display = 'block';
+        setTimeout(() => autoUnlockInput.focus(), 0);
+    }
+
+    function closeAutoUnlockModal() {
+        autoUnlockModal.style.display = 'none';
+    }
+
+    async function submitAutoUnlockCode() {
+        const code = autoUnlockInput.value;
+        if (!code.trim()) {
+            autoUnlockMessage.textContent = 'Enter the unlock code from Ko-fi.';
+            autoUnlockMessage.className = 'unlock-message unlock-message-error';
+            return;
+        }
+
+        const hash = await hashUnlockCode(code);
+        if (hash === AUTO_UNLOCK_HASH) {
+            localStorage.setItem(AUTO_UNLOCK_STORAGE_KEY, 'true');
+            autoUnlockMessage.textContent = 'Auto mode unlocked.';
+            autoUnlockMessage.className = 'unlock-message unlock-message-success';
+            updateAutoButtonLockState();
+            setTimeout(closeAutoUnlockModal, 550);
+            return;
+        }
+
+        autoUnlockMessage.textContent = 'Unlock code did not match.';
+        autoUnlockMessage.className = 'unlock-message unlock-message-error';
+    }
 
     // Sound Manager using Web Audio API
     const SoundManager = {
@@ -252,12 +312,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (autoBtn) {
             autoBtn.classList.remove('auto-btn-active');
             autoBtn.setAttribute('aria-pressed', 'false');
-            autoBtn.setAttribute('aria-label', 'Auto mode');
-            autoBtn.title = 'Auto mode';
+            updateAutoButtonLockState();
         }
     }
 
     function toggleAutoMode() {
+        if (!isAutoModeUnlocked()) {
+            openAutoUnlockModal();
+            return;
+        }
+
         if (autoMode) {
             stopAutoMode();
             return;
@@ -719,6 +783,11 @@ document.addEventListener('DOMContentLoaded', () => {
     restartBtn.addEventListener('click', startGame);
     autoBtn.addEventListener('click', toggleAutoMode);
     retryBtn.addEventListener('click', startGame);
+    autoUnlockCloseBtn.addEventListener('click', closeAutoUnlockModal);
+    autoUnlockSubmit.addEventListener('click', submitAutoUnlockCode);
+    autoUnlockInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') submitAutoUnlockCode();
+    });
 
     // Help Modal
     const helpModal = document.getElementById('help-modal');
@@ -736,6 +805,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('click', (event) => {
         if (event.target === helpModal) {
             helpModal.style.display = 'none';
+        }
+        if (event.target === autoUnlockModal) {
+            closeAutoUnlockModal();
         }
     });
 

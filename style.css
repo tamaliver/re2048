@@ -140,6 +140,14 @@ button:hover {
   background: #f67c5f;
 }
 
+.auto-btn-locked {
+  background: #8f7a66;
+}
+
+.auto-btn-locked .auto-icon {
+  opacity: 0.62;
+}
+
 .auto-icon {
   width: 21px;
   height: 18px;
@@ -370,6 +378,63 @@ button:hover {
   color: #8f7a66;
 }
 
+.unlock-modal-content {
+  max-width: 420px;
+}
+
+.unlock-form {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0 8px;
+}
+
+.unlock-input {
+  width: 100%;
+  min-width: 0;
+  border: 2px solid rgba(143, 122, 102, 0.28);
+  border-radius: 6px;
+  padding: 9px 10px;
+  color: #515151;
+  font: inherit;
+  font-size: 14px;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.unlock-input:focus {
+  border-color: #8f7a66;
+}
+
+.unlock-submit {
+  flex: 0 0 auto;
+}
+
+.unlock-message {
+  min-height: 20px;
+  margin: 8px 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.unlock-message-error {
+  color: #c15d4f;
+}
+
+.unlock-message-success {
+  color: #5f8d5a;
+}
+
+.unlock-kofi-link {
+  color: #5f7fbf;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.unlock-kofi-link:hover {
+  text-decoration: underline;
+}
+
 .help-section p {
   font-size: 14px;
   line-height: 1.6;
@@ -507,6 +572,10 @@ button:hover {
     width: 100%;
     max-height: calc(100vh - 24px);
     max-height: calc(100dvh - 24px);
+  }
+
+  .unlock-form {
+    flex-direction: column;
   }
 
 }

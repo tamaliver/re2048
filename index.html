@@ -39,10 +39,10 @@
         <div class="help-section">
           <h3>Japanese</h3>
           <p>[Start Game]を押してゲームを始めよう！同じ数字のタイルをスワイプで重ねると合体して2倍になります。ステージの倍数は2〜9をランダムに設定します。</p>
-          <p>ロボットボタンを押すとAuto modeになります。ゲームが自動で進むので、合成されていく盤面をぼーっと眺めて楽しめます。Auto mode中のスコアはBESTには反映されません。</p>
+          <p>ロボットボタンはKo-fiで支援してくれた人向けのAuto modeです。解除コードを入力すると、ゲームが自動で進む盤面をぼーっと眺めて楽しめます。Auto mode中のスコアはBESTには反映されません。</p>
           <h3>English</h3>
           <p>Press [Start Game] to begin! Swipe identical tiles to merge them and double their value. The multiplier is randomly set between 2 and 9 for each game.</p>
-          <p>Press the robot button to start Auto mode. The game will play itself, so you can relax and watch the board evolve. Scores earned in Auto mode do not update BEST.</p>
+          <p>The robot button opens Auto mode for Ko-fi supporters. Enter the supporter unlock code to let the game play itself while you relax and watch the board evolve. Scores earned in Auto mode do not update BEST.</p>
         </div>
         <hr>
         <h2>App Mode / ホーム画面に追加</h2>
@@ -58,6 +58,23 @@
             <li>Select "Add to Home Screen"</li>
           </ol>
         </div>
+      </div>
+    </div>
+
+    <div id="auto-unlock-modal" class="modal">
+      <div class="modal-content unlock-modal-content">
+        <span class="close-btn" id="auto-unlock-close-btn">&times;</span>
+        <h2>Auto mode</h2>
+        <div class="help-section">
+          <p>Auto mode is available for Ko-fi supporters. Enter the unlock code from Ko-fi to enable the robot button on this device.</p>
+          <p>Auto modeはKo-fiで支援してくれた人向けです。Ko-fiで受け取った解除コードを入力すると、この端末でロボットボタンが使えるようになります。</p>
+        </div>
+        <div class="unlock-form">
+          <input id="auto-unlock-input" class="unlock-input" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Unlock code">
+          <button id="auto-unlock-submit" class="unlock-submit" type="button">Unlock</button>
+        </div>
+        <p id="auto-unlock-message" class="unlock-message" aria-live="polite"></p>
+        <a class="unlock-kofi-link" href="https://ko-fi.com/B2P320X27U" target="_blank" rel="noopener noreferrer">Support on Ko-fi</a>
       </div>
     </div>
 
@@ -119,7 +136,7 @@
     </footer>
   </div>
 
-  <script src="script.js?v=8"></script>
+  <script src="script.js?v=9"></script>
 </body>
 
 </html>
